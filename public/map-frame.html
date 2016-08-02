@@ -1,0 +1,33 @@
+<div class="container">
+  <div class = "row">
+    <div class="col-md-3">
+      <button type="button" class="btn btn-success" ng-click="startMission(sensor, center)">Start Sim</button>
+      <button type="button" class="btn btn-warning">Stop Sim</button>
+      <input id="lattitude" class="form-control" type="number" step="0.01" ng-model="center.lat" required>
+      <input id="longitude" class="form-control" type="number" step="0.01" ng-model="center.lng" required>
+    </div>
+    <div class="col-md-9">
+    </div>
+  </div>
+  <div class = "row">
+    <div class="col-md-8">
+      <!-- <iframe src="map.html" height="700px" width="100%"></iframe> -->
+      <leaflet lf-center="center" paths="dronePath" markers="markers" height="750px" width="750px"></leaflet>
+    </div>
+    <div class="col-md-4">
+      <p><b>DRONE SENSOR DATA-SET #{{ sensor._id }} </b></p>
+      <p><b>Battery:</b> {{ sensor.battery }}% </p>
+      <p><b>GPS Signal Strength:</b> {{ sensor.gpsSigStr }} </p>
+      <p><b>GPS:</b> {{ sensor.gpsN }}, {{ sensor.gpsW }} </p>
+      <p><b>Heading:</b> {{ sensor.headingN }}, {{ sensor.headingW }} </p>
+      <p><b>Destination:</b> {{ sensor.destN }}, {{ sensor.destW }} </p>
+      <p><b>Accelerometer:</b> <br><b>X: </b>{{ sensor.gpsW }} <br><b>Y: </b>{{ sensor.accelY }} <br><b>Z: </b>{{ sensor.accelZ }} </p>
+      <p><b>Visual Positioning Sensor (isActive):</b> {{ sensor.vPosSensor }} </p>
+      <p><b>Ultrasonic Sensor (isActive):</b> {{ sensor.uSonicSensor }} </p>
+      <p><b>Internal Error Message:</b> {{ sensor.internalErr }} </p>
+      <p><b>Internal Error Flag:</b> {{ sensor.internalErrCode}} </p>
+
+      <p><b>Json array of sensor data:</b><br> {{sensors}}
+    </div>
+  </div>
+</div>
