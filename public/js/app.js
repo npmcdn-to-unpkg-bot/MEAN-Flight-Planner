@@ -6,7 +6,7 @@ angular.module("contactsApp", ['ngRoute', 'leaflet-directive'])
                 templateUrl: "map-frame.html",
                 resolve: {
                     sensors: function(Sensors) {
-                        return Sensors.getSensor();
+                        return Sensors.getSensors();
                     }
                 }
             })
