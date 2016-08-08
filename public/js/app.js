@@ -45,23 +45,17 @@ angular.module("contactsApp", ['ngRoute', 'leaflet-directive'])
                     console.log(response);
                 });
         }
-        this.tick = function(sensor) {
-
-        }
 
     })
-    .controller('MapBoxController', function($scope, Sensors, sensors) {
+    .controller('MapBoxController', function($scope, $interval, Sensors, sensors) {
             $scope.sensors = sensors.data;
-            // initial Map location before http.get
+            $scope.missionInProgress = false;
 
-            var mainMarker = {
-                lat: 37.289896645804035,
-                lng: -121.90017700195312,
-                focus: true,
-                message: "Current Drone location",
-                draggable: true
-            };
+            var droneLatlng = L.latLng(0, 0);
+            var destLatlng = L.latLng(0, 0);
+            $scope.distRem = 0;
 
+            // initialize leafletJS variables
             angular.extend($scope, {
                 center: {
                     lat: 0,
@@ -69,7 +63,25 @@ angular.module("contactsApp", ['ngRoute', 'leaflet-directive'])
                     zoom: 0
                 },
                 markers: {
-                    mainMarker: angular.copy(mainMarker)
+                    drone: {
+                        lat: 0,
+                        lng: 0,
+                        icon: {
+                            iconUrl: '../img/icon_drone.png',
+                            iconSize: [80, 80],
+                            iconAnchor: [40, 42],
+                            popupAnchor: [0, 0],
+                            shadowSize: [0, 0],
+                            shadowAnchor: [0, 0]
+                        }
+                    },
+                    destination: {
+                        lat: 0,
+                        lng: 0,
+                        focus: false,
+                        message: "Destination",
+                        draggable: true
+                    }
                 },
                 position: {
                     lat: 51,
@@ -89,47 +101,88 @@ angular.module("contactsApp", ['ngRoute', 'leaflet-directive'])
                                 { lat: 0, lng: 0 },
                                 { lat: 0, lng: 0 }
                             ],
-                            message: "<h5>Drone Path</h5><p>Distance: 1862km</p>",
+                            message: "blank",
                         }
                 }
             });
 
             // sensorId = "579fa5fc22419f1a34bc19b0"
-
-
-
+            // INITIAL Update map based on sensorData
             Sensors.getSensor().then(function(doc) {
                 $scope.sensor = doc.data;
 
-                // set map center point
+                // set map center point & zoom
                 $scope.center.lat = $scope.sensor.gpsN;
                 $scope.center.lng = $scope.sensor.gpsW;
-                $scope.center.zoom = 12;
+                $scope.center.zoom = 14;
 
-                // Set Mission path points
+                // Set Mission path points & markers
                 $scope.dronePath.p1.latlngs[0].lat = $scope.sensor.gpsN;
                 $scope.dronePath.p1.latlngs[0].lng = $scope.sensor.gpsW;
+                $scope.markers.drone.lat = $scope.sensor.gpsN;
+                $scope.markers.drone.lng = $scope.sensor.gpsW;
+
                 $scope.dronePath.p1.latlngs[1].lat = $scope.sensor.destN;
                 $scope.dronePath.p1.latlngs[1].lng = $scope.sensor.destW;
+                $scope.markers.destination.lat = $scope.sensor.destN;
+                $scope.markers.destination.lng = $scope.sensor.destW;
+
+                destLatlng = L.latLng($scope.sensor.destN, $scope.sensor.destW);
+                droneLatlng = L.latLng($scope.sensor.gpsN, $scope.sensor.gpsW);
+
+                $scope.dronePath.p1.message = "Drone Path";
+                $scope.distRem = droneLatlng.distanceTo(destLatlng);
 
             }, function(response) {
                 alert(response);
             });
             $scope.startMission = function(sensor, center) {
                 //Set default values
-                sensor.battery = 100;
+                sensor.battery = 90;
                 sensor.vPosSensor = true;
                 sensor.uSonicSensor = true;
                 sensor.internalErr = "none";
                 sensor.internalErrCode = 0;
 
-                sensor.gpsN = center.lat;
-                sensor.gpsW = center.lng;
-
-                Sensors.updateSensor(sensor);
+                $scope.missionInProgress = true;
 
                 // Start time tick
                 // defualt 10s
+            }
+
+            $scope.stopMission = function(){
+              $scope.missionInProgress = false;
+            }
+
+            $interval(function () {
+              if ($scope.missionInProgress == true){
+                $scope.droneStep();
+              }
+
+            }, 50);
+
+            // Simlate sensor values for a step in drone movement
+            $scope.droneStep = function(){
+              $scope.sensor.gpsN += 0.0001;
+              $scope.sensor.gpsW += 0.0001;
+
+              destLatlng = L.latLng($scope.sensor.destN, $scope.sensor.destW);
+              droneLatlng = L.latLng($scope.sensor.gpsN, $scope.sensor.gpsW);
+              $scope.distRem = droneLatlng.distanceTo(destLatlng);
+
+              Sensors.updateSensor($scope.sensor);
+
+              $scope.markers.drone.lat = $scope.sensor.gpsN;
+              $scope.markers.drone.lng = $scope.sensor.gpsW;
+              /*
+              if(L.equals(droneLatlng, destLatlng, 0.01)){
+                $scope.missionInProgress = false;
+              } */
+
+              if($scope.sensor.destN < $scope.sensor.gpsN){
+                $scope.missionInProgress = false;
+              }
+
             }
 
 

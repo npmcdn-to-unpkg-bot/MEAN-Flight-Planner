@@ -1,19 +1,17 @@
-[
-  {
-    "battery": 100,
-    "gpsSigStr": 10,
-    "gpsN": 37.334998,
-    "gpsW": -121.888462,
-    "headingN": 37.334998,
-    "headingW": -121.888462,
-    "destN": 37.335780,
-    "destW": -121.869544,
-    "accelX": 0.2843,
-    "accelY": -0.5673,
-    "accelZ": -10.362,
-    "vPosSensor": "true",
-    "uSonicSensor": "true",
-    "internalErr": "none",
-    "internalErrCode": 0
-  }
-]
+{
+  "battery": 100,
+  "gpsSigStr": 10,
+  "gpsN": 37.318998,
+  "gpsW": -121.904462,
+  "headingN": 37.334998,
+  "headingW": -121.888462,
+  "destN": 37.341958,
+  "destW": -121.881501,
+  "accelX": 0.2843,
+  "accelY": -0.5673,
+  "accelZ": -10.362,
+  "vPosSensor": "true",
+  "uSonicSensor": "true",
+  "internalErr": "none",
+  "internalErrCode": 0
+}

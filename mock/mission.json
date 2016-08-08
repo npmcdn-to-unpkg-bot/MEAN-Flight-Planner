@@ -1,9 +1,7 @@
-[
-  {
-    "targetAFreqA": "1.334",
-    "targetAAuth": "ffh765Gsg3jJ74kdla4G",
-    "targetBFreq": "1.563",
-    "targetBAuth": "ffh765Gsg3jJ74kdla4G",
-    "missionBegin": "false"
-  }
-]
+{
+  "targetAFreqA": "1.334",
+  "targetAAuth": "ffh765Gsg3jJ74kdla4G",
+  "targetBFreq": "1.563",
+  "targetBAuth": "ffh765Gsg3jJ74kdla4G",
+  "missionBegin": "false"
+}
