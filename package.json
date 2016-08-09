@@ -1,7 +1,7 @@
 {
-  "name": "MEAN",
+  "name": "MEAN-Flight-Planner",
   "version": "1.0.0",
-  "description": "A MEAN app that allows users to manage contact lists",
+  "description": "A UAV flight planner and tracking app built on the MEAN stack",
   "engines": {
     "node": "4.4.7"
   },
