@@ -136,7 +136,7 @@ angular.module("contactsApp", ['ngRoute', 'leaflet-directive'])
             }, function(response) {
                 alert(response);
             });
-            $scope.startMission = function(sensor, center) {
+            $scope.startMission = function(sensor) {
                 //Set default values
                 sensor.battery = 90;
                 sensor.vPosSensor = true;
@@ -184,34 +184,4 @@ angular.module("contactsApp", ['ngRoute', 'leaflet-directive'])
               }
 
             }
-
-
-
-       })
-    .controller("EditContactController", function($scope, $routeParams, Contacts) {
-        Contacts.getContact($routeParams.contactId).then(function(doc) {
-            $scope.contact = doc.data;
-        }, function(response) {
-            alert(response);
-        });
-
-        $scope.toggleEdit = function() {
-            $scope.editMode = true;
-            $scope.contactFormUrl = "contact-form.html";
-        }
-
-        $scope.back = function() {
-            $scope.editMode = false;
-            $scope.contactFormUrl = "";
-        }
-
-        $scope.saveContact = function(contact) {
-            Contacts.editContact(contact);
-            $scope.editMode = false;
-            $scope.contactFormUrl = "";
-        }
-
-        $scope.deleteContact = function(contactId) {
-            Contacts.deleteContact(contactId);
-        }
-    });
+       });
