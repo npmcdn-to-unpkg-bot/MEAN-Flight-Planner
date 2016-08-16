@@ -4,7 +4,6 @@ var bodyParser = require("body-parser");
 var mongodb = require("mongodb");
 var ObjectID = mongodb.ObjectID;
 
-var CONTACTS_COLLECTION = "contacts";
 var SENSORS_COLLECTION = "sensors";
 var MISSION_COLLECTION = "mission";
 
@@ -32,10 +31,6 @@ mongodb.MongoClient.connect(process.env.MONGODB_URI, function (err, database) {
     console.log("App now running on port", port);
   });
 });
-
-// CONTACTS API ROUTES BELOW
-
-// TODO: Replace with basic Simulator ROUTES
 
 // Generic error handler used by all endpoints.
 function handleError(res, reason, message, code) {
