@@ -15,7 +15,7 @@ angular.module("contactsApp", ['ngRoute', 'leaflet-directive'])
             })
     })
     .service("Sensors", function($http) {
-      // 579d18c62e025e402457042d
+      // 57b5e5df58be5e03c433e656
         this.getSensors = function() {
           return $http.get("/fc/sensors").
               then(function(response) {
@@ -26,7 +26,7 @@ angular.module("contactsApp", ['ngRoute', 'leaflet-directive'])
         }
         this.getSensor = function() {
           // The single sensor data that is being used
-            var url = "/fc/sensors/" + "579fa5fc22419f1a34bc19b0";
+            var url = "/fc/sensors/" + "57b5e5df58be5e03c433e656";
             return $http.get(url).
                 then(function(response) {
                     return response;
@@ -55,33 +55,60 @@ angular.module("contactsApp", ['ngRoute', 'leaflet-directive'])
             var destLatlng = L.latLng(0, 0);
             $scope.distRem = 0;
 
+            var uavsToMarkers = function(points) {
+              return points.map(function(ap) {
+                return {
+                  
+                  lat: ap.gpsN,
+                  lng: ap.gpsW,
+                  icon: {
+                        iconUrl: '../img/icon_drone.png',
+                        iconSize: [50, 50],
+                        iconAnchor: [40, 42],
+                        popupAnchor: [0, 0],
+                        shadowSize: [0, 0],
+                        shadowAnchor: [0, 0]
+                        }
+                };
+              });
+            };
+
+            var destinationsToMarkers = function(points) {
+              return points.map(function(ap) {
+                return {
+                        lat: ap.destN,
+                        lng: ap.destW,
+                        focus: false,
+                        message: "Destination: " + ap._id,
+                        draggable: true
+                };
+              });
+            };
+
+            var destinationsToPaths = function(points) {
+              return points.map(function(ap) {
+                return {
+                  
+                  lat: ap.gpsN,
+                  lng: ap.gpsW,
+                  icon: {
+                        iconUrl: '../img/icon_drone.png',
+                        iconSize: [80, 80],
+                        iconAnchor: [40, 42],
+                        popupAnchor: [0, 0],
+                        shadowSize: [0, 0],
+                        shadowAnchor: [0, 0]
+                        }
+                };
+              });
+            };
+
             // initialize leafletJS variables
             angular.extend($scope, {
                 center: {
                     lat: 0,
                     lng: 0,
                     zoom: 0
-                },
-                markers: {
-                    drone: {
-                        lat: 0,
-                        lng: 0,
-                        icon: {
-                            iconUrl: '../img/icon_drone.png',
-                            iconSize: [80, 80],
-                            iconAnchor: [40, 42],
-                            popupAnchor: [0, 0],
-                            shadowSize: [0, 0],
-                            shadowAnchor: [0, 0]
-                        }
-                    },
-                    destination: {
-                        lat: 0,
-                        lng: 0,
-                        focus: false,
-                        message: "Destination",
-                        draggable: true
-                    }
                 },
                 position: {
                     lat: 51,
@@ -105,6 +132,11 @@ angular.module("contactsApp", ['ngRoute', 'leaflet-directive'])
                         }
                 }
             });
+            var destMarkers = destinationsToMarkers(sensors.data);
+            var uavMarkers = uavsToMarkers(sensors.data);
+            
+            $scope.markers = destMarkers.concat(uavMarkers);
+
 
             // sensorId = "579fa5fc22419f1a34bc19b0"
             // INITIAL Update map based on sensorData
@@ -114,8 +146,9 @@ angular.module("contactsApp", ['ngRoute', 'leaflet-directive'])
                 // set map center point & zoom
                 $scope.center.lat = $scope.sensor.gpsN;
                 $scope.center.lng = $scope.sensor.gpsW;
-                $scope.center.zoom = 14;
+                $scope.center.zoom = 12;
 
+                /*
                 // Set Mission path points & markers
                 $scope.dronePath.p1.latlngs[0].lat = $scope.sensor.gpsN;
                 $scope.dronePath.p1.latlngs[0].lng = $scope.sensor.gpsW;
@@ -132,6 +165,8 @@ angular.module("contactsApp", ['ngRoute', 'leaflet-directive'])
 
                 $scope.dronePath.p1.message = "Drone Path";
                 $scope.distRem = droneLatlng.distanceTo(destLatlng);
+
+                */
 
             }, function(response) {
                 alert(response);
