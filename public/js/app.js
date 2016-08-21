@@ -61,10 +61,11 @@ angular.module("contactsApp", ['ngRoute', 'leaflet-directive'])
                   
                   lat: ap.gpsN,
                   lng: ap.gpsW,
+                  message: "UAV # " + ap._id,
                   icon: {
                         iconUrl: '../img/icon_drone.png',
                         iconSize: [50, 50],
-                        iconAnchor: [40, 42],
+                        iconAnchor: [25, 25],
                         popupAnchor: [0, 0],
                         shadowSize: [0, 0],
                         shadowAnchor: [0, 0]
@@ -88,17 +89,13 @@ angular.module("contactsApp", ['ngRoute', 'leaflet-directive'])
             var destinationsToPaths = function(points) {
               return points.map(function(ap) {
                 return {
-                  
-                  lat: ap.gpsN,
-                  lng: ap.gpsW,
-                  icon: {
-                        iconUrl: '../img/icon_drone.png',
-                        iconSize: [80, 80],
-                        iconAnchor: [40, 42],
-                        popupAnchor: [0, 0],
-                        shadowSize: [0, 0],
-                        shadowAnchor: [0, 0]
-                        }
+                            color: 'green',
+                            weight: 5,
+                            latlngs: [
+                                { lat: ap.gpsN, lng: ap.gpsW },
+                                { lat: ap.destN, lng: ap.destW }
+                            ],
+                            message: "Path: " + ap._id + "<br>" + "Collision: unlinkely",
                 };
               });
             };
@@ -136,6 +133,8 @@ angular.module("contactsApp", ['ngRoute', 'leaflet-directive'])
             var uavMarkers = uavsToMarkers(sensors.data);
             
             $scope.markers = destMarkers.concat(uavMarkers);
+
+            $scope.dronePath = destinationsToPaths(sensors.data);
 
 
             // sensorId = "579fa5fc22419f1a34bc19b0"
