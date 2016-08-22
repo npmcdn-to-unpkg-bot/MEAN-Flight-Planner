@@ -15,10 +15,13 @@ angular.module("contactsApp", ['ngRoute', 'leaflet-directive'])
             })
     })
     .service("Sensors", function($http) {
-      // 57b5e5df58be5e03c433e656
+
         this.getSensors = function() {
           return $http.get("/fc/sensors").
               then(function(response) {
+                  if (response.data.length > 100){
+                    response.data = response.data.slice(0, 100);
+                  }
                   return response;
               }, function(response){
                   alert("Error finding /fc/sensors");
@@ -52,7 +55,12 @@ angular.module("contactsApp", ['ngRoute', 'leaflet-directive'])
             var GPS_STEP_VAL = 0.001;
             var BATTERY_STEP_VAL = 2;
             var NUM_UAV_IN_DB = sensors.data.length;
+            var getCounter = 0;
+            var putCounter = 0;
 
+
+            $scope.uavNumber = NUM_UAV_IN_DB;
+            $scope.sendPutReq = false;
             $scope.sensors = sensors.data;
             $scope.missionInProgress = false;
             $scope.sensor = sensors.data[0];
@@ -170,7 +178,7 @@ angular.module("contactsApp", ['ngRoute', 'leaflet-directive'])
                 $scope.droneStep();
               }
 
-            }, 50);
+            }, 100);
 
             // Simlate sensor values for a step in drone movement
             $scope.droneStep = function(){
@@ -196,7 +204,10 @@ angular.module("contactsApp", ['ngRoute', 'leaflet-directive'])
                     $scope.markers[i + NUM_UAV_IN_DB].lat = $scope.sensors[i].gpsN;
                     $scope.markers[i + NUM_UAV_IN_DB].lng = $scope.sensors[i].gpsW;
 
-                    //Sensors.updateSensor($scope.sensors[i]);
+                    if ($scope.sendPutReq ==  true && putCounter == 40){
+                        Sensors.updateSensor($scope.sensors[i]);
+                        putCounter = 0;
+                    }
 
                     // TODO: Calculate distance:
                     /*
@@ -204,31 +215,18 @@ angular.module("contactsApp", ['ngRoute', 'leaflet-directive'])
                     droneLatlng = L.latLng($scope.sensor.gpsN, $scope.sensor.gpsW);
                     $scope.distRem = droneLatlng.distanceTo(destLatlng);
                     */
-
                 }
-                /*
-                $scope.sensor.gpsN += 0.0001;
-                $scope.sensor.gpsW += 0.0001;
-
-                destLatlng = L.latLng($scope.sensor.destN, $scope.sensor.destW);
-                droneLatlng = L.latLng($scope.sensor.gpsN, $scope.sensor.gpsW);
-                $scope.distRem = droneLatlng.distanceTo(destLatlng);
-
-                Sensors.updateSensor($scope.sensor);
-
-                $scope.markers.drone.lat = $scope.sensor.gpsN;
-                $scope.markers.drone.lng = $scope.sensor.gpsW;
-                */
-
-                /*
-                if(L.equals(droneLatlng, destLatlng, 0.01)){
-                    $scope.missionInProgress = false;
+                
+                if (getCounter == 80){
+                    // Update Sensors from API 
+                    Sensors.getSensors().then(function(doc) {
+                        $scope.sensors = doc.data;
+                    }, function(response) {
+                        alert(response);
+                    });
+                    getCounter = 0;
                 }
-
-                if($scope.sensor.destN < $scope.sensor.gpsN){
-                    $scope.missionInProgress = false;
-                }
-                */
-
+                putCounter++;
+                getCounter++;
             }
        });

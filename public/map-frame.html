@@ -1,13 +1,11 @@
 <div class="container">
   <div class = "row">
-    <div class="col-md-3">
-      <button type="button" class="btn btn-success" ng-click="startMission(sensors, center)">Start Sim</button>
+    <button type="button" class="btn btn-success" ng-click="startMission(sensors, center)">Start Sim</button>
       <button type="button" class="btn btn-warning" ng-click="stopMission()">Stop Sim</button>
+      <input type="checkbox" ng-model="sendPutReq"/> Simulation Updates Sensor data in DB
+      <p><b>Connected UAVs:</b> {{ uavNumber }} / 200</p>
       <!--<input id="lattitude" class="form-control" type="number" step="0.01" ng-model="center.lat" required> -->
       <!--<input id="longitude" class="form-control" type="number" step="0.01" ng-model="center.lng" required> -->
-    </div>
-    <div class="col-md-9">
-    </div>
   </div>
   <div class = "row">
     <div class="col-md-8">
