@@ -72,15 +72,14 @@ app.post("/fc/sensors", function(req, res) {
   });
 });
 
-app.put("/fc/sensors/", function(req, res) {
+app.put("/fc/sensors/:id", function(req, res) {
   var updateDoc = req.body;
   delete updateDoc._id;
   updateDoc.createDate = new Date();
 
-  // Always id 579fa5fc22419f1a34bc19b0
-  db.collection(SENSORS_COLLECTION).updateOne({_id: new ObjectID('579fa5fc22419f1a34bc19b0')}, updateDoc, function(err, doc) {
+  db.collection(SENSORS_COLLECTION).updateOne({_id: new ObjectID(req.params.id)}, updateDoc, function(err, doc) {
     if (err) {
-      handleError(res, err.message, "Failed to update sensors data");
+      handleError(res, err.message, "Failed to update sensor data set: " + req.params.id);
     } else {
       res.status(204).end();
     }

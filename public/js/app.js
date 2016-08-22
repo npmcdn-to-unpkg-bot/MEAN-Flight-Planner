@@ -35,8 +35,8 @@ angular.module("contactsApp", ['ngRoute', 'leaflet-directive'])
                 });
         }
         this.updateSensor = function(sensor) {
-            var url = "/fc/sensors/";
-            console.log("Updated Sensor: " + sensor._id);
+            var url = "/fc/sensors/" + sensor._id;
+            console.log("Updating Sensor: " + sensor._id);
             return $http.put(url, sensor).
                 then(function(response) {
                     return response;
@@ -48,8 +48,14 @@ angular.module("contactsApp", ['ngRoute', 'leaflet-directive'])
 
     })
     .controller('MapBoxController', function($scope, $interval, Sensors, sensors) {
+
+            var GPS_STEP_VAL = 0.001;
+            var BATTERY_STEP_VAL = 2;
+            var NUM_UAV_IN_DB = sensors.data.length;
+
             $scope.sensors = sensors.data;
             $scope.missionInProgress = false;
+            $scope.sensor = sensors.data[0];
 
             var droneLatlng = L.latLng(0, 0);
             var destLatlng = L.latLng(0, 0);
@@ -103,9 +109,9 @@ angular.module("contactsApp", ['ngRoute', 'leaflet-directive'])
             // initialize leafletJS variables
             angular.extend($scope, {
                 center: {
-                    lat: 0,
-                    lng: 0,
-                    zoom: 0
+                    lat: $scope.sensor.gpsN,
+                    lng: $scope.sensor.gpsW,
+                    zoom: 10
                 },
                 position: {
                     lat: 51,
@@ -136,48 +142,19 @@ angular.module("contactsApp", ['ngRoute', 'leaflet-directive'])
 
             $scope.dronePath = destinationsToPaths(sensors.data);
 
+            $scope.startMission = function(sensorsArr) {
 
-            // sensorId = "579fa5fc22419f1a34bc19b0"
-            // INITIAL Update map based on sensorData
-            Sensors.getSensor().then(function(doc) {
-                $scope.sensor = doc.data;
+                for(i =0; i < sensorsArr.length; i++){
+                    //Set default values
+                    sensorsArr[i].battery = 100;
+                    sensorsArr[i].vPosSensor = true;
+                    sensorsArr[i].uSonicSensor = true;
+                    sensorsArr[i].internalErr = "none";
+                    sensorsArr[i].internalErrCode = 0;
 
-                // set map center point & zoom
-                $scope.center.lat = $scope.sensor.gpsN;
-                $scope.center.lng = $scope.sensor.gpsW;
-                $scope.center.zoom = 12;
-
-                /*
-                // Set Mission path points & markers
-                $scope.dronePath.p1.latlngs[0].lat = $scope.sensor.gpsN;
-                $scope.dronePath.p1.latlngs[0].lng = $scope.sensor.gpsW;
-                $scope.markers.drone.lat = $scope.sensor.gpsN;
-                $scope.markers.drone.lng = $scope.sensor.gpsW;
-
-                $scope.dronePath.p1.latlngs[1].lat = $scope.sensor.destN;
-                $scope.dronePath.p1.latlngs[1].lng = $scope.sensor.destW;
-                $scope.markers.destination.lat = $scope.sensor.destN;
-                $scope.markers.destination.lng = $scope.sensor.destW;
-
-                destLatlng = L.latLng($scope.sensor.destN, $scope.sensor.destW);
-                droneLatlng = L.latLng($scope.sensor.gpsN, $scope.sensor.gpsW);
-
-                $scope.dronePath.p1.message = "Drone Path";
-                $scope.distRem = droneLatlng.distanceTo(destLatlng);
-
-                */
-
-            }, function(response) {
-                alert(response);
-            });
-            $scope.startMission = function(sensor) {
-                //Set default values
-                sensor.battery = 90;
-                sensor.vPosSensor = true;
-                sensor.uSonicSensor = true;
-                sensor.internalErr = "none";
-                sensor.internalErrCode = 0;
-
+                    Sensors.updateSensor(sensorsArr[i]);
+                }
+                // Start Sim once all Sensors are updated
                 $scope.missionInProgress = true;
 
                 // Start time tick
@@ -197,25 +174,61 @@ angular.module("contactsApp", ['ngRoute', 'leaflet-directive'])
 
             // Simlate sensor values for a step in drone movement
             $scope.droneStep = function(){
-              $scope.sensor.gpsN += 0.0001;
-              $scope.sensor.gpsW += 0.0001;
 
-              destLatlng = L.latLng($scope.sensor.destN, $scope.sensor.destW);
-              droneLatlng = L.latLng($scope.sensor.gpsN, $scope.sensor.gpsW);
-              $scope.distRem = droneLatlng.distanceTo(destLatlng);
+                for(i = 0; i < $scope.sensors.length; i++){
 
-              Sensors.updateSensor($scope.sensor);
+                    // Movement N & W +/- by GPS_STEP_VAL
+                    if ($scope.sensors[i].gpsN > $scope.sensors[i].destN){
+                        $scope.sensors[i].gpsN -= GPS_STEP_VAL;
+                    }
+                    else if ($scope.sensors[i].gpsN < $scope.sensors[i].destN) {
+                        $scope.sensors[i].gpsN += GPS_STEP_VAL;
+                    }
+                    if ($scope.sensors[i].gpsW > $scope.sensors[i].destW){
+                        $scope.sensors[i].gpsW -= GPS_STEP_VAL;
+                    }
+                    else if ($scope.sensors[i].gpsW < $scope.sensors[i].destW) {
+                        $scope.sensors[i].gpsW += GPS_STEP_VAL;
+                    }
+                    // Decrement battery
+                    $scope.sensors[i].battery -= BATTERY_STEP_VAL;
 
-              $scope.markers.drone.lat = $scope.sensor.gpsN;
-              $scope.markers.drone.lng = $scope.sensor.gpsW;
-              /*
-              if(L.equals(droneLatlng, destLatlng, 0.01)){
-                $scope.missionInProgress = false;
-              } */
+                    $scope.markers[i + NUM_UAV_IN_DB].lat = $scope.sensors[i].gpsN;
+                    $scope.markers[i + NUM_UAV_IN_DB].lng = $scope.sensors[i].gpsW;
 
-              if($scope.sensor.destN < $scope.sensor.gpsN){
-                $scope.missionInProgress = false;
-              }
+                    //Sensors.updateSensor($scope.sensors[i]);
+
+                    // TODO: Calculate distance:
+                    /*
+                    destLatlng = L.latLng($scope.sensor.destN, $scope.sensor.destW);
+                    droneLatlng = L.latLng($scope.sensor.gpsN, $scope.sensor.gpsW);
+                    $scope.distRem = droneLatlng.distanceTo(destLatlng);
+                    */
+
+                }
+                /*
+                $scope.sensor.gpsN += 0.0001;
+                $scope.sensor.gpsW += 0.0001;
+
+                destLatlng = L.latLng($scope.sensor.destN, $scope.sensor.destW);
+                droneLatlng = L.latLng($scope.sensor.gpsN, $scope.sensor.gpsW);
+                $scope.distRem = droneLatlng.distanceTo(destLatlng);
+
+                Sensors.updateSensor($scope.sensor);
+
+                $scope.markers.drone.lat = $scope.sensor.gpsN;
+                $scope.markers.drone.lng = $scope.sensor.gpsW;
+                */
+
+                /*
+                if(L.equals(droneLatlng, destLatlng, 0.01)){
+                    $scope.missionInProgress = false;
+                }
+
+                if($scope.sensor.destN < $scope.sensor.gpsN){
+                    $scope.missionInProgress = false;
+                }
+                */
 
             }
        });

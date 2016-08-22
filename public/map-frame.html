@@ -1,7 +1,7 @@
 <div class="container">
   <div class = "row">
     <div class="col-md-3">
-      <button type="button" class="btn btn-success" ng-click="startMission(sensor, center)">Start Sim</button>
+      <button type="button" class="btn btn-success" ng-click="startMission(sensors, center)">Start Sim</button>
       <button type="button" class="btn btn-warning" ng-click="stopMission()">Stop Sim</button>
       <!--<input id="lattitude" class="form-control" type="number" step="0.01" ng-model="center.lat" required> -->
       <!--<input id="longitude" class="form-control" type="number" step="0.01" ng-model="center.lng" required> -->
@@ -29,7 +29,10 @@
 
       <p><b>Distance Remaining: </b> {{ distRem }} M</p>
 
-      <p><b>Sensor data sets (json):</b><br> {{sensors}}
+      <p><b>Sensor data sets (json):</b><br>
+      <div style="height:180px;width:100%;border:1px solid #ccc;font:14px Consolas;overflow:auto;">
+        {{sensors}}
+      </div>
     </div>
   </div>
 </div>
