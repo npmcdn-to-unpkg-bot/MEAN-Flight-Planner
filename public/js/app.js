@@ -171,6 +171,14 @@ angular.module("contactsApp", ['ngRoute', 'leaflet-directive'])
 
             $scope.stopMission = function(){
               $scope.missionInProgress = false;
+
+              // run one last Update to server
+              if ($scope.sendPutReq ==  true){
+                  for(i = 0; i < $scope.sensors.length; i++){
+                    Sensors.updateSensor($scope.sensors[i]);
+                  }            
+              }
+              
             }
 
             $interval(function () {
@@ -217,7 +225,7 @@ angular.module("contactsApp", ['ngRoute', 'leaflet-directive'])
                     */
                 }
                 
-                if (getCounter == 80){
+                if (getCounter == 80 && $scope.sendPutReq ==  false){
                     // Update Sensors from API 
                     Sensors.getSensors().then(function(doc) {
                         $scope.sensors = doc.data;
