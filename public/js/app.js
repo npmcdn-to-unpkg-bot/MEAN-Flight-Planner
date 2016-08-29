@@ -52,18 +52,23 @@ angular.module("contactsApp", ['ngRoute', 'leaflet-directive'])
     })
     .controller('MapBoxController', function($scope, $interval, Sensors, sensors) {
 
-            var GPS_STEP_VAL = 0.001;
+            var GPS_STEP_VAL = 0.0001; // ~14 meters per step 
+            var SIM_STEP_FREQUENCY = 100; // 
             var BATTERY_STEP_VAL = 2;
             var NUM_UAV_IN_DB = sensors.data.length;
             var getCounter = 0;
             var putCounter = 0;
 
-
             $scope.uavNumber = NUM_UAV_IN_DB;
             $scope.sendPutReq = false;
+            $scope.sentGetReq = false;
             $scope.sensors = sensors.data;
             $scope.missionInProgress = false;
+            $scope.stepSim = true;
             $scope.sensor = sensors.data[0];
+            $scope.simTime = 0;
+            $scope.simRealTime = 0; // Calculated with drone flying ~ 14 m/s
+            $scope.selectedSensorIndex = 0;
 
             var droneLatlng = L.latLng(0, 0);
             var destLatlng = L.latLng(0, 0);
@@ -182,14 +187,18 @@ angular.module("contactsApp", ['ngRoute', 'leaflet-directive'])
             }
 
             $interval(function () {
-              if ($scope.missionInProgress == true){
+              if ($scope.missionInProgress == true && $scope.stepSim == false){
                 $scope.droneStep();
               }
 
-            }, 100);
+            }, SIM_STEP_FREQUENCY);
 
             // Simlate sensor values for a step in drone movement
             $scope.droneStep = function(){
+
+                // increment simTime and realTime
+                $scope.simTime += SIM_STEP_FREQUENCY;
+                $scope.simRealTime++;
 
                 for(i = 0; i < $scope.sensors.length; i++){
 
@@ -225,7 +234,7 @@ angular.module("contactsApp", ['ngRoute', 'leaflet-directive'])
                     */
                 }
                 
-                if (getCounter == 80 && $scope.sendPutReq ==  false){
+                if (getCounter == 80 && $scope.sendGetReq ==  true){
                     // Update Sensors from API 
                     Sensors.getSensors().then(function(doc) {
                         $scope.sensors = doc.data;
